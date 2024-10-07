@@ -55,6 +55,36 @@ public class App {
                       e.printStackTrace();
                     }
                     break;
+                  case 2:
+                    System.out.println("Digite o nome do Livro: ");
+                    String titulo = input.nextLine();
+                    System.out.println("Digite o autor do Livro: ");
+                    String autorLivro = input.nextLine();
+                    command = "SELECT ID FROM authors WHERE name = ?";
+                    int authorid = 0; 
+                    try(PreparedStatement ps = con.prepareStatement(command)){
+                          ps.setString(1, autorLivro);
+                          ResultSet resultSet = ps.executeQuery();
+                          while(resultSet.next()){
+                            authorid = resultSet.getInt("id");
+                          }
+                          if(authorid != 0){
+                              command = "INSERT INTO books(name,authorid) VALUES (?,?)";
+                              try (PreparedStatement insertPs = con.prepareStatement(command)){
+                                insertPs.setString(1,titulo);
+                                insertPs.setInt(2,authorid);
+                                insertPs.executeUpdate();
+                                System.out.println("Livro adicionado!");
+                              } catch(SQLException e){
+                                e.printStackTrace();
+                              }
+                          }
+                          else 
+                            System.out.println("Autor não encontrado"); 
+
+                    } catch(SQLException e){
+                      e.printStackTrace();
+                    }
                   default:
                     break;
               }
