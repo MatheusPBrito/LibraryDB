@@ -16,6 +16,7 @@ public class App {
             Class.forName("org.mariadb.jdbc.Driver");
             Connection con = DriverManager.getConnection("jdbc:mariadb://localhost:3306/","user","123");
             Statement statement = con.createStatement();
+            ResultSet resultSet;
             String command = "CREATE DATABASE IF NOT EXISTS librarydb";
             statement.executeUpdate(command);
             command = "USE librarydb";
@@ -64,7 +65,7 @@ public class App {
                     int authorid = 0; 
                     try(PreparedStatement ps = con.prepareStatement(command)){
                           ps.setString(1, autorLivro);
-                          ResultSet resultSet = ps.executeQuery();
+                          resultSet = ps.executeQuery();
                           while(resultSet.next()){
                             authorid = resultSet.getInt("id");
                           }
@@ -85,6 +86,27 @@ public class App {
                     } catch(SQLException e){
                       e.printStackTrace();
                     }
+                    break;
+                  case 3:
+                    command = "SELECT * FROM authors"; 
+                    resultSet = statement.executeQuery(command);
+                    while (resultSet.next()) {
+                       System.out.println("Nome: " + resultSet.getString("name") + " Nacionalidade: " + resultSet.getString("country")); 
+                    }
+                    break;
+                  case 4:
+                    command = "SELECT * FROM books";
+                    resultSet = statement.executeQuery(command);
+                    String tituloLivro = "";
+                    while (resultSet.next()) {
+                        tituloLivro = resultSet.getString("name");
+                        command = "SELECT name FROM authors WHERE id = " + resultSet.getInt("id");
+                        ResultSet secondSet = statement.executeQuery(command);
+                        while (secondSet.next()) {
+                          System.out.println("Titulo: " + tituloLivro + " Autor: " + secondSet.getString("name")); 
+                        }
+                    }
+                    break;
                   default:
                     break;
               }
