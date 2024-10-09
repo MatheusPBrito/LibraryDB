@@ -16,7 +16,6 @@ public class App {
             Class.forName("org.mariadb.jdbc.Driver");
             Connection con = DriverManager.getConnection("jdbc:mariadb://localhost:3306/","user","123");
             Statement statement = con.createStatement();
-            ResultSet resultSet;
             String command = "CREATE DATABASE IF NOT EXISTS librarydb";
             statement.executeUpdate(command);
             command = "USE librarydb";
@@ -65,10 +64,11 @@ public class App {
                     int authorid = 0; 
                     try(PreparedStatement ps = con.prepareStatement(command)){
                           ps.setString(1, autorLivro);
-                          resultSet = ps.executeQuery();
+                          ResultSet resultSet = ps.executeQuery();
                           while(resultSet.next()){
                             authorid = resultSet.getInt("id");
                           }
+                          resultSet.close();
                           if(authorid != 0){
                               command = "INSERT INTO books(name,authorid) VALUES (?,?)";
                               try (PreparedStatement insertPs = con.prepareStatement(command)){
@@ -89,23 +89,26 @@ public class App {
                     break;
                   case 3:
                     command = "SELECT * FROM authors"; 
-                    resultSet = statement.executeQuery(command);
-                    while (resultSet.next()) {
-                       System.out.println("Nome: " + resultSet.getString("name") + " Nacionalidade: " + resultSet.getString("country")); 
+                    ResultSet resultAuthors = statement.executeQuery(command);
+                    while (resultAuthors.next()) {
+                       System.out.println("Nome: " + resultAuthors.getString("name") + " Nacionalidade: " + resultAuthors.getString("country")); 
                     }
+                    resultAuthors.close();
                     break;
                   case 4:
                     command = "SELECT * FROM books";
-                    resultSet = statement.executeQuery(command);
+                    ResultSet resultBooks = statement.executeQuery(command);
                     String tituloLivro = "";
-                    while (resultSet.next()) {
-                        tituloLivro = resultSet.getString("name");
-                        command = "SELECT name FROM authors WHERE id = " + resultSet.getInt("id");
-                        ResultSet secondSet = statement.executeQuery(command);
-                        while (secondSet.next()) {
-                          System.out.println("Titulo: " + tituloLivro + " Autor: " + secondSet.getString("name")); 
+                    while (resultBooks.next()) {
+                        tituloLivro = resultBooks.getString("name");
+                        command = "SELECT name FROM authors WHERE id = " + resultBooks.getInt("authorid");
+                        ResultSet resultAuthorName = statement.executeQuery(command);
+                        while (resultAuthorName.next()) {
+                          System.out.println("Titulo: " + tituloLivro + " Autor: " + resultAuthorName.getString("name")); 
                         }
+                        resultAuthorName.close();
                     }
+                    resultBooks.close();
                     break;
                   default:
                     break;
